@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chalamandra Magistral: La App del 1%</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+    <style>
+        :root {
+            --dorado: #FFD700;
+            --magenta: #FF4D6D;
+            --verde-malandra: #2A9D8F;
+            --negro: #0D0A0B;
+            --gris-oscuro: #1A1A1A;
+            --premium-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, #0D0A0B 0%, #1a1a1a 100%);
+            color: #F8F9FA;
+            min-height: 100vh;
+        }
+        
+        h1, h2, h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 900;
+        }
+        
+        .premium-glow {
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.7), 0 0 40px rgba(255, 215, 0, 0.4);
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50% }
+            50% { background-position: 100% 50% }
+            100% { background-position: 0% 50% }
+        }
+
+        .card-hack {
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: linear-gradient(145deg, #1a1a1a, #0f0f0f);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .card-hack::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+            transition: left 0.6s;
+        }
+        
+        .card-hack:hover::before {
+            left: 100%;
+        }
+        
+        .card-hack:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.3);
+            border-color: var(--dorado);
+        }
+
+        .service-card {
+            background: linear-gradient(160deg, #2c2c2c, #1a1a1a);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            border: 2px solid transparent;
+            background-clip: padding-box;
+            position: relative;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #FFD700, #FF4D6D, #2A9D8F);
+            border-radius: 1.5rem;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+
+        .service-card:hover::before {
+            opacity: 1;
+        }
+
+        .service-card:hover {
+            transform: translateY(-12px);
+        }
+
+        .price-badge {
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00);
+            color: var(--negro);
+            font-weight: 900;
+            padding: 0.75rem 1.5rem;
+            border-radius: 9999px;
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+            font-size: 1.1rem;
+        }
+
+        .completion-btn {
+            transition: all 0.3s ease;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid transparent;
+        }
+        .completion-btn.pending {
+            background: linear-gradient(135deg, #4a4a4a, #333);
+            color: #FFD700;
+            border-color: #FFD700;
+        }
+        .completion-btn.completed {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #0D0A0B;
+            font-weight: 900;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 50;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a1a, #0f0f0f);
+            border-radius: 2rem;
+            padding: 3rem;
+            width: 95%;
+            max-width: 700px;
+            box-shadow: 0 25px 50px rgba(255, 215, 0, 0.3);
+            transform: scale(0.8) translateY(50px);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid var(--dorado);
+        }
+        .modal-overlay.active .modal-content {
+            transform: scale(1) translateY(0);
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .confetti {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+            animation: confetti-fall linear forwards;
+        }
+
+        #global-progress { 
+            height: 16px; 
+            background: #2a2a2a; 
+            border-radius: 10px; 
+            overflow:hidden; 
+            margin:15px auto 0; 
+            max-width: 500px; 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
+        }
+        #global-progress-bar { 
+            height:100%; 
+            width:0%; 
+            background:linear-gradient(90deg,#FFD700,#FFA500,#FF8C00);
+            transition: width 0.6s ease;
+            border-radius: 10px;
+        }
+
+        #srap-pulse {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #FF4D6D, #FF8C00);
+            margin: 20px auto;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 0 30px rgba(255, 77, 109, 0.5);
+        }
+        #srap-pulse.pulsing {
+            animation: srapPulse 2s infinite alternate;
+        }
+        @keyframes srapPulse {
+            0% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 30px rgba(255, 77, 109, 0.5); }
+            100% { transform: scale(1.3); opacity: 0.4; box-shadow: 0 0 60px rgba(255, 77, 109, 0.8); }
+        }
+
+        .quiz-option {
+            background: linear-gradient(135deg, #2c2c2c, #1f1f1f);
+            border: 2px solid #4a4a4a;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .quiz-option:hover {
+            background: linear-gradient(135deg, #3a3a3a, #2c2c2c);
+            border-color: var(--magenta);
+            transform: translateY(-2px);
+        }
+        .quiz-option.selected {
+            background: linear-gradient(135deg, var(--magenta), #FF8C00);
+            color: var(--negro);
+            font-weight: 900;
+            border-color: #FFD700;
+            transform: scale(1.02);
+        }
+
+        .contact-form-container {
+            background: linear-gradient(135deg, #1f1f1f, #151515);
+            padding: 3rem;
+            border-radius: 2rem;
+            border: 2px solid var(--dorado);
+            box-shadow: 0 20px 40px rgba(255, 215, 0, 0.2);
+        }
+        .contact-form-container input, .contact-form-container textarea, .contact-form-container select {
+            background: #2a2a2a;
+            border: 2px solid #444;
+            color: #F8F9FA;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            width: 100%;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        .contact-form-container input:focus, .contact-form-container textarea:focus, .contact-form-container select:focus {
+            border-color: var(--magenta);
+            outline: none;
+            box-shadow: 0 0 20px rgba(255, 77, 109, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .cert-card {
+            background: linear-gradient(135deg, #1f1f1f, #151515);
+            border: 2px solid #333;
+            transition: all 0.4s ease;
+        }
+        .cert-card.unlocked {
+            border-color: var(--verde-malandra);
+            box-shadow: 0 15px 35px rgba(42, 157, 143, 0.4);
+            transform: translateY(-5px);
+        }
+
+        .floating { 
+            animation: floating 3s ease-in-out infinite;
+        }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .pulse-glow {
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
+            100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- Header & Hero Section -->
+    <header class="text-center py-20 md:py-28 hero-gradient relative overflow-hidden shadow-2xl">
+        <div class="absolute inset-0 bg-black opacity-40"></div>
+        <div class="relative z-10 px-4">
+            <h1 class="text-5xl md:text-7xl font-black premium-glow mb-4 floating">
+                CHALAMANDRA MAGISTRAL
+            </h1>
+            <p class="text-2xl md:text-4xl font-semibold mb-6 text-white">
+                El Sistema Operativo del 1%
+            </p>
+            <div class="max-w-2xl mx-auto text-lg md:text-xl text-white border-t border-b border-white/20 py-4 mt-8 font-semibold">
+                <span class="text-pink-300">🍓 Fresa</span> • 
+                <span class="text-green-300">🔪 Malandra</span> • 
+                <span class="text-yellow-300">👑 Chola</span>
+            </div>
+            <!-- Progress Bar -->
+            <div id="global-progress" class="mt-8"><div id="global-progress-bar"></div></div>
+            <p id="progress-text" class="text-lg text-white/80 mt-4 font-semibold">0/7 Hacks Magistrales Dominados</p>
+        </div>
+    </header>
+
+    <!-- SRAP Ritual Section -->
+    <section class="py-16 px-4 bg-gradient-to-br from-gray-900 to-black shadow-inner">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">🌀 NÚCLEO SRAP™</h2>
+            <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                <strong>Sincroniza Ritmos en Acción Presente.</strong> El protocolo que activa tus 7 poderes cognitivos y filtra el caos en claridad táctica.
+            </p>
+            <div id="srap-pulse" class="mx-auto mt-8"></div> 
+            <button class="px-10 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black rounded-2xl shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-110 text-lg pulse-glow" onclick="showSRAPModal()">
+                🚀 ACTIVAR RITUAL SRAP
+            </button>
+        </div>
+    </section>
+
+    <!-- Test de Identidad -->
+    <section class="py-20 px-6 max-w-4xl mx-auto">
+        <h2 class="text-4xl font-black text-center mb-6 text-yellow-300">
+            🎩 DESCUBRE TU CÓDIGO MAESTRO
+        </h2>
+        <p class="text-xl text-center text-gray-300 mb-12 italic">
+            ¿Eres Fresa, Malandra o Chola? Tu arquetipo determina tu ventaja competitiva.
+        </p>
+
+        <div id="quiz-start-screen" class="text-center">
+            <button onclick="startQuiz()" class="px-12 py-5 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-black rounded-2xl shadow-2xl hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 text-lg pulse-glow">
+                🎯 INICIAR DECODIFICACIÓN
+            </button>
+        </div>
+
+        <div id="quiz-area" class="hidden">
+            <div id="current-question" class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-700">
+                <p class="text-2xl font-bold text-yellow-300 mb-8 text-center" id="question-text"></p>
+                <div id="options-container" class="space-y-4">
+                    <!-- Options -->
+                </div>
+            </div>
+            <div class="text-center mt-10">
+                <button onclick="nextQuestion()" id="next-button" class="px-10 py-4 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors text-lg hidden">CONTINUAR DECODIFICACIÓN</button>
+                <button onclick="showQuizResult()" id="result-button" class="px-10 py-4 bg-green-600 text-white font-bold rounded-xl hover:bg-green-700 transition-colors text-lg hidden">VER MI CÓDIGO</button>
+            </div>
+        </div>
+
+        <div id="quiz-result" class="hidden bg-gradient-to-br from-gray-900 to-black p-10 rounded-2xl shadow-2xl border-2 border-purple-500">
+            <h3 class="text-4xl font-black text-center mb-6 premium-glow" id="result-title"></h3>
+            <p class="text-xl text-center mb-8 text-gray-300 leading-relaxed" id="result-description"></p>
+            <div class="bg-gray-800 p-6 rounded-xl mt-8 border-l-4 border-yellow-400">
+                <h4 class="text-2xl font-bold text-yellow-400 mb-4">🎯 PROTOCOLO SRAP PERSONALIZADO:</h4>
+                <p class="text-gray-200 text-lg leading-relaxed" id="result-srap-tip"></p>
+            </div>
+            <div class="text-center mt-10">
+                <button onclick="resetQuiz()" class="text-gray-400 hover:text-gray-200 transition-colors text-sm">REINICIAR DECODIFICACIÓN</button>
+            </div>
+        </div>
+    </section>
+
+    <div class="border-t border-gray-700 mt-20"></div>
+
+    <!-- 7 Hacks Grid -->
+    <section class="py-20 px-6 max-w-6xl mx-auto">
+        <h2 class="text-4xl font-black text-center mb-16 premium-glow">⚡ LOS 7 PODERES COGNITIVOS</h2>
+        
+        <div id="hacks-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <!-- Cards will be injected by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Certificaciones Section -->
+    <section class="py-20 px-6 max-w-6xl mx-auto border-t border-gray-700">
+        <h2 class="text-5xl font-black text-center mb-6 text-green-300">
+            🏆 CERTIFICACIONES DE MAESTRÍA
+        </h2>
+        <p class="text-2xl text-center mb-16 text-gray-400 font-semibold italic">
+            Domina los protocolos esenciales de cada arquetipo y reclama tu autoridad cognitiva.
+        </p>
+
+        <div id="certifications-container" class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <!-- Certification cards will be injected by JavaScript -->
+        </div>
+    </section>
+
+    <!-- Credenciales Google Section -->
+    <section class="py-20 px-6 max-w-6xl mx-auto border-t border-gray-700">
+        <h2 class="text-4xl font-black text-center mb-6 text-white">
+            🚀 TECNOLOGÍA CERTIFICADA POR GOOGLE
+        </h2>
+        <p class="text-xl text-center mb-12 text-gray-300 font-semibold italic">
+            Metodologías validadas con inteligencia artificial de vanguardia.
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border-l-4 border-green-400 shadow-xl">
+                <h3 class="text-2xl font-bold text-white mb-4">🤖 IA GENERATIVA AVANZADA</h3>
+                <p class="text-gray-300 text-lg">Certificación en inteligencia artificial aplicada a psicología cognitiva y patrones de comportamiento.</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border-l-4 border-blue-400 shadow-xl">
+                <h3 class="text-2xl font-bold text-white mb-4">☁️ ARQUITECTURA CLOUD</h3>
+                <p class="text-gray-300 text-lg">Infraestructura escalable para sistemas de decodificación masiva y análisis predictivo.</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border-l-4 border-red-400 shadow-xl">
+                <h3 class="text-2xl font-bold text-white mb-4">📊 ANÁLISIS DE PATRONES</h3>
+                <p class="text-gray-300 text-lg">Sistemas avanzados de reconocimiento y decodificación de patrones fractales en comportamiento humano.</p>
+            </div>
+            
+            <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border-l-4 border-yellow-400 shadow-xl">
+                <h3 class="text-2xl font-bold text-white mb-4">⚡ OPTIMIZACIÓN COGNITIVA</h3>
+                <p class="text-gray-300 text-lg">Protocolos de aceleración mental y optimización de procesos de toma de decisiones.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Servicios Premium -->
+    <section class="py-20 px-6 max-w-6xl mx-auto border-t border-gray-700 mt-16">
+        <h2 class="text-5xl font-black text-center mb-6 text-yellow-300">
+            💎 SISTEMAS DE DECODIFICACIÓN
+        </h2>
+        <p class="text-2xl text-center mb-16 text-gray-300 font-semibold italic">
+            <span class="text-red-400">🔥 OFERTA FUNDADORA:</span> Precios especiales mientras construyo mi portfolio
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            
+            <div class="service-card flex flex-col justify-between">
+                <div>
+                    <h3 class="text-3xl font-black text-green-400 mb-4 flex items-center">
+                        <span class="mr-3">🔑</span> SESIÓN DESCUBRIMIENTO
+                    </h3>
+                    <p class="text-gray-400 text-lg mb-6 leading-relaxed">Tu primera inmersión en el método. Diagnóstico completo + 1 estrategia aplicable inmediatamente.</p>
+                    <ul class="text-gray-500 space-y-3 mb-6 text-sm">
+                        <li class="flex items-center"><span class="text-green-400 mr-2">✓</span> Sesión de 60 minutos (no 45)</li>
+                        <li class="flex items-center"><span class="text-green-400 mr-2">✓</span> Diagnóstico de arquetipo profundo</li>
+                        <li class="flex items-center"><span class="text-green-400 mr-2">✓</span> 1 estrategia concreta para aplicar</li>
+                        <li class="flex items-center"><span class="text-green-400 mr-2">✓</span> Análisis con IA Generativa</li>
+                        <li class="flex items-center"><span class="text-green-400 mr-2">✓</span> PDF personalizado con insights</li>
+                    </ul>
+                </div>
+                <div class="text-center">
+                    <div class="price-badge text-lg mb-4">$27 USD</div>
+                    <button onclick="selectService('sesion-descubrimiento')" class="w-full bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 text-white font-black py-4 px-6 rounded-xl transition-all transform hover:scale-105 text-lg pulse-glow">
+                        🚀 AGENDAR SESIÓN
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card flex flex-col justify-between transform scale-105 relative">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                    <span class="bg-red-600 text-white text-sm font-black px-4 py-2 rounded-full shadow-lg pulse-glow">MÁS POPULAR</span>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-black text-yellow-400 mb-4 flex items-center">
+                        <span class="mr-3">🔮</span> KIT MAGISTRAL
+                    </h3>
+                    <p class="text-gray-400 text-lg mb-6 leading-relaxed">Todo lo que necesitas para dominar tus primeros 3 hacks y transformar tu mentalidad.</p>
+                    <ul class="text-gray-500 space-y-3 mb-6 text-sm">
+                        <li class="flex items-center"><span class="text-yellow-400 mr-2">✓</span> 2 sesiones de 60 minutos</li>
+                        <li class="flex items-center"><span class="text-yellow-400 mr-2">✓</span> Kit completo de 3 metodologías</li>
+                        <li class="flex items-center"><span class="text-yellow-400 mr-2">✓</span> 7 plantillas descargables</li>
+                        <li class="flex items-center"><span class="text-yellow-400 mr-2">✓</span> 3 audio-guías exclusivas</li>
+                        <li class="flex items-center"><span class="text-yellow-400 mr-2">✓</span> Acceso a comunidad privada</li>
+                        <li class="flex items-center"><span class="text-yellow-400 mr-2">✓</span> Soporte por 30 días</li>
+                    </ul>
+                </div>
+                <div class="text-center">
+                    <div class="price-badge text-lg mb-4">$67 USD</div>
+                    <button onclick="selectService('kit-magistral')" class="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-black font-black py-4 px-6 rounded-xl transition-all transform hover:scale-105 text-lg pulse-glow">
+                        💥 ACCEDER AL KIT
+                    </button>
+                </div>
+            </div>
+
+            <div class="service-card flex flex-col justify-between">
+                <div>
+                    <h3 class="text-3xl font-black text-purple-400 mb-4 flex items-center">
+                        <span class="mr-3">👑</span> TRANSFORMACIÓN TOTAL
+                    </h3>
+                    <p class="text-gray-400 text-lg mb-6 leading-relaxed">Decodificación completa de todos tus patrones + acompañamiento personalizado.</p>
+                    <ul class="text-gray-500 space-y-3 mb-6 text-sm">
+                        <li class="flex items-center"><span class="text-purple-400 mr-2">✓</span> 4 sesiones mensuales</li>
+                        <li class="flex items-center"><span class="text-purple-400 mr-2">✓</span> Acceso a los 7 hacks completos</li>
+                        <li class="flex items-center"><span class="text-purple-400 mr-2">✓</span> Biblioteca completa de recursos</li>
+                        <li class="flex items-center"><span class="text-purple-400 mr-2">✓</span> Certificación digital incluida</li>
+                        <li class="flex items-center"><span class="text-purple-400 mr-2">✓</span> Grupo mastermind exclusivo</li>
+                        <li class="flex items-center"><span class="text-purple-400 mr-2">✓</span> Soporte prioritario 24/7</li>
+                    </ul>
+                </div>
+                <div class="text-center">
+                    <div class="price-badge text-lg mb-4">$147 USD</div>
+                    <button onclick="selectService('transformacion-total')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-black py-4 px-6 rounded-xl transition-all transform hover:scale-105 text-lg pulse-glow">
+                        🌟 INICIAR TRANSFORMACIÓN
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Garantía -->
+        <div class="text-center mt-16">
+            <div class="bg-gradient-to-r from-green-600 to-emerald-700 p-6 rounded-2xl inline-block">
+                <h4 class="text-2xl font-black text-white mb-2">✅ GARANTÍA DE RESULTADOS</h4>
+                <p class="text-white text-lg">Si en tu primera sesión no obtienes al menos 1 estrategia aplicable inmediatamente,<br><strong>te devuelvo el 100% de tu inversión.</strong></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Formulario de Contacto -->
+    <div class="max-w-2xl mx-auto mt-20 contact-form-container">
+        <h3 class="text-4xl font-black text-center mb-6 text-yellow-300">
+            🚀 SOLICITAR ACCESO INMEDIATO
+        </h3>
+        
+        <!-- Contador de cupos -->
+        <div class="bg-red-600 text-white p-4 rounded-xl text-center mb-6 pulse-glow">
+            <h4 class="text-xl font-black mb-2">🚨 OFERTA FUNDADORA ACTIVA</h4>
+            <p class="text-lg">Solo 5 cupos disponibles esta semana a precios especiales</p>
+        </div>
+
+        <form id="contact-form" onsubmit="handleFormSubmit(event)">
+            <div class="mb-6">
+                <label class="block text-lg font-bold mb-3 text-magenta">Sistema de Interés:</label>
+                <select name="service" class="bg-gray-800 text-white p-4 rounded-xl w-full border-2 border-gray-600 text-lg" required>
+                    <option value="">Selecciona tu sistema</option>
+                    <option value="sesion-descubrimiento">🔑 Sesión Descubrimiento - $27 USD</option>
+                    <option value="kit-magistral">🔮 Kit Magistral - $67 USD</option>
+                    <option value="transformacion-total">👑 Transformación Total - $147 USD</option>
+                </select>
+            </div>
+            <div class="mb-6">
+                <label class="block text-lg font-bold mb-3 text-magenta">Nombre:</label>
+                <input type="text" name="name" required class="bg-gray-800 text-white p-4 rounded-xl w-full border-2 border-gray-600 text-lg" placeholder="Tu nombre o alias" />
+            </div>
+            <div class="mb-6">
+                <label class="block text-lg font-bold mb-3 text-magenta">Email:</label>
+                <input type="email" name="email" required class="bg-gray-800 text-white p-4 rounded-xl w-full border-2 border-gray-600 text-lg" placeholder="email@dominio.com" />
+            </div>
+            <div class="mb-8">
+                <label class="block text-lg font-bold mb-3 text-magenta">Tu Mayor Desafío Actual:</label>
+                <textarea name="message" rows="4" required class="bg-gray-800 text-white p-4 rounded-xl w-full border-2 border-gray-600 text-lg" placeholder="¿Qué patrón quieres hackear primero? ¿Qué resultado buscas?"></textarea>
+            </div>
+            <button type="submit" class="w-full px-12 py-5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black rounded-2xl text-xl shadow-2xl hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 pulse-glow">
+                🚀 SOLICITAR ACCESO INMEDIATO
+            </button>
+        </form>
+
+        <div class="text-center mt-6 text-sm text-gray-400">
+            ⚡ Recibirás confirmación y detalles de pago en menos de 2 horas
+        </div>
+    </div>
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/1234567890?text=Hola,%20vi%20Chalamandra%20Magistral%20y%20quiero%20agendar%20mi%20sesión%20de%20$27%20USD" 
+       target="_blank"
+       class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl z-50 transition-all hover:scale-110 pulse-glow">
+       <span class="text-2xl">💬</span>
+    </a>
+
+    <!-- Modal -->
+    <div id="amplificacion-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 id="modal-hack-title" class="text-4xl font-black text-yellow-400 mb-4"></h3>
+            <p id="modal-hack-subtitle" class="text-xl font-semibold text-gray-300 mb-8"></p>
+            
+            <div class="border-t border-b border-gray-600 py-6 mb-8">
+                <h4 class="text-2xl font-bold text-green-400 mb-4 flex items-center">
+                    <span class="mr-3">🔍</span>AMPLIFICACIÓN PROFUNDA
+                </h4>
+                <p id="modal-amplificacion" class="text-gray-200 text-lg leading-relaxed"></p>
+            </div>
+            
+            <div class="bg-gray-800 p-6 rounded-2xl border-l-4 border-magenta">
+                <h4 class="text-2xl font-bold text-magenta mb-4 flex items-center">
+                    <span class="mr-3">⚡</span>EJERCICIO DE ACTIVACIÓN
+                </h4>
+                <p id="modal-ejercicio" class="text-gray-300 text-lg"></p>
+            </div>
+
+            <button onclick="hideModal()" class="mt-10 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-xl transition-colors text-lg">
+                CERRAR Y CONTINUAR
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // === CONFIGURACIÓN INICIAL ===
+        const hacksData = [
+            {id:1,title:"Scheherazade",subtitle:"Dominio Narrativo Absoluto",metodo:"7 Sombreros de Innovación",archetype:"fresa",archetypeIcon:'🍓',amplificacion:"No cuentes historias, secuestra marcos de referencia. Controlas la lente perceptual, no los eventos. Es 'pre-suasión' pura: construyes la catedral antes de invitar a orar.",ejercicio:"Antes de tu próxima reunión importante, envía un email 'preparatorio' que reencuadre el tema completamente a tu favor (ej: 'Imaginemos un futuro donde X sea imposible...')",colorClass:"text-pink-400",icon:'👑'},
+            {id:2,title:"Hermes Trismegisto",subtitle:"Robo de Patrones Fractales",metodo:"5 Porqués (Excavación Profunda)",archetype:"malandra",archetypeIcon:'🔪',amplificacion:"El sistema operativo de la realidad. Las 'causas raíz' son universales en forma, no únicas en contenido. Transfiere soluciones a la estructura, no al problema específico.",ejercicio:"Crea un 'mapa fractal' semanal: toma un problema personal y encuéntralo replicado en 3 contextos históricos o industriales completamente diferentes.",colorClass:"text-green-400",icon:'🔑'},
+            {id:3,title:"Lewis Carroll",subtitle:"La Pregunta Absurda",metodo:"6 Sombreros de Bono (Paradoja)",archetype:"fresa",archetypeIcon:'🍓',amplificacion:"La paradoja es la 'restricción liberadora'. Cuando fuerzas al cerebro a sostener ideas contradictorias, se ve forzado a construir un nuevo modelo mental (disrupción pura).",ejercicio:"Toma una paradoja personal (ej: 'Quiero estabilidad pero aventura') y fuerza una fusión radical en un plan de acción concreto esta semana.",colorClass:"text-yellow-400",icon:'🎩'},
+            {id:4,title:"Hacker Anónima",subtitle:"Hackeo de Sistemas Invisibles",metodo:"Ajedrez en 3 Planos Dimensionales",archetype:"malandra",archetypeIcon:'🔪',amplificacion:"No se hackean cosas, se hackean incentivos. Opera siempre con el 'código fuente' (incentivos reales), nunca con el 'modelo mental del manual de usuario'.",ejercicio:"Identifica un incentivo oculto en tu entorno laboral (ej: 'La gente realmente optimiza para evitar reuniones largas') y diseña un exploit esta semana.",colorClass:"text-indigo-400",icon:'🐍'},
+            {id:5,title:"El Trickster",subtitle:"Inyección Estratégica de Caos",metodo:"4 Cuadrantes de Covey (Reorganización)",archetype:"chola",archetypeIcon:'👑',amplificacion:"El caos estratégico es una 'prueba de estrés' controlada. Es la forma más rápida de obligar al sistema a revelar sus verdaderas vulnerabilidades y dependencias ocultas.",ejercicio:"Programa un 'día de caos' mensual: invierte completamente tu rutina (ej: empieza por el final del día) y documenta qué patrones emergen.",colorClass:"text-red-400",icon:'💣'},
+            {id:6,title:"Inteligencia Artificial",subtitle:"Supremacía de Datos",metodo:"La Correlación sobre la Causalidad",archetype:"malandra",archetypeIcon:'🔪',amplificacion:"El 99% se obsesiona con el 'porqué' y la 'verdad'; el 1% se enfoca exclusivamente en el 'qué funciona'. La correlación ofrece patrones predictivos explotables inmediatamente.",ejercicio:"Analiza tus 5 decisiones más importantes del último mes: ¿Cuántas fallaron por intuición? Corrige al menos una esta semana usando solo datos duros.",colorClass:"text-cyan-400",icon:'📊'},
+            {id:7,title:"Tu Yo de 8 Años",subtitle:"Conexión con el Genio Interior",metodo:"Técnica Disney (Soñador, Realista, Crítico)",archetype:"chola",archetypeIcon:'👑',amplificacion:"El adulto está contaminado de sesgos. El niño interior opera en espacio pre-lógico, donde la imaginación no está limitada por el 'realismo'. Fuente de originalidad radical.",ejercicio:"Programa una 'Ronda de Pitch del Niño de 8 Años' semanal: describe tu proyecto actual usando solo dibujos o juguetes, e incorpora una idea 'loca' que surja.",colorClass:"text-orange-400",icon:'🧸'}
+        ];
+
+        const certificationsData = [
+            {key:'chola',title:'Maestría Chola en Resiliencia y Supervivencia',icon:'👑',color:'text-yellow-400',hacks:[5,7],description:'Tu código vital es la **Resiliencia Pura**. Has dominado el arte de encontrar el orden en el caos y usar el juego como estrategia para la supervivencia. No temes al riesgo, sino a la inercia. Tienes el coraje para inyectar caos y la inocencia para soñar sin límites.', srap: "Baila 5 minutos para activar tu energía, enfocándote en la expresión pura, sin juicio. Luego, anota una 'acción límite' que te dé miedo, y ¡ejecútala!"},
+            {key:'malandra',title:'Maestría Malandra en Audacia y Estrategia Fractal',icon:'🔪',color:'text-green-400',hacks:[2,4,6],description:'Tu motor es la **Estrategia Fría**. Ves patrones en todo, hackeas los incentivos y priorizas los datos sobre la corazonada. Tienes la audacia para manipular el tablero invisible y la disciplina para robar patrones de éxito en cualquier industria.', srap: "Sincroniza tus ritmos emocionales con datos: toma una decisión crucial solo después de revisar 3 métricas, no por corazonada. Luego, revisa 5 Porqués en una relación o negocio fallido."},
+            {key:'fresa',title:'Maestría Fresa en Aspiración y Manipulación Narrativa',icon:'🍓',color:'text-pink-400',hacks:[1,3],description:'Tu arma es la **Percepción Magistral**. Has conquistado la pre-suasión y el control del encuadre. Tu aspiración estética te permite generar innovación radical a través de la tensión de la paradoja y el poder de tu narrativa.', srap: "Activa un 'Sombrero' creativo (ej. El Soñador) y dedícale 15 minutos sin interrupción para generar una idea absurda, luego pausa y decodifica su potencial narrativo."},
+        ];
+
+        // === SISTEMA DE QUIZ COMPLETO ===
+        let currentQuestionIndex = 0;
+        let scores = { chola: 0, malandra: 0, fresa: 0 };
+        let selectedOption = null;
+
+        const quizQuestions = [
+            {
+                text: "¿Qué te guía al tomar una decisión bajo presión extrema?",
+                options: [
+                    { text: "La resiliencia de la experiencia: hacer lo que sé que funciona para sobrevivir, sin pensarlo dos veces.", value: 'chola' },
+                    { text: "La lógica implacable de la estrategia: analizar incentivos ocultos y datos concretos antes de moverme.", value: 'malandra' },
+                    { text: "La intuición creativa pura: lo que se siente estéticamente correcto y rompe moldes narrativos.", value: 'fresa' },
+                ]
+            },
+            {
+                text: "Cuando enfrentas un fracaso catastrófico, tu primer instinto es:",
+                options: [
+                    { text: "Inyectar caos controlado: romper toda rutina o hacer algo radicalmente ridículo para forzar una grieta de oportunidad.", value: 'chola' },
+                    { text: "Excavación forense profunda: usar los 5 Porqués para encontrar el patrón fractal que causó el colapso.", value: 'malandra' },
+                    { text: "Reenmarcado narrativo total: convertir el fracaso en una épica lección que fortalezca mi marca personal.", value: 'fresa' },
+                ]
+            },
+            {
+                text: "¿Cuál es tu forma natural de generar innovación disruptiva?",
+                options: [
+                    { text: "Jugar como un niño salvaje: dedicar tiempo a ideas 'imposibles' sin restricciones de viabilidad o 'realismo'.", value: 'chola' },
+                    { text: "Hackear sistemas establecidos: encontrar reglas no escritas en la industria y diseñar exploits elegantes.", value: 'malandra' },
+                    { text: "Fusionar conceptos antagónicos: generar ideas nuevas forzando la tensión entre opuestos perfectos.", value: 'fresa' },
+                ]
+            },
+            {
+                text: "En un conflicto, tu arma secreta es:",
+                options: [
+                    { text: "La adaptabilidad total: puedo cambiar de forma y estrategia en segundos según lo que requiera la situación.", value: 'chola' },
+                    { text: "El análisis de incentivos: entiendo exactamente qué mueve a cada persona y juego con eso.", value: 'malandra' },
+                    { text: "El control del relato: domino completamente cómo se percibe y recuerda la situación.", value: 'fresa' },
+                ]
+            },
+            {
+                text: "Tu superpoder oculto es:",
+                options: [
+                    { text: "Encontrar oportunidades donde otros solo ven problemas imposibles.", value: 'chola' },
+                    { text: "Ver los patrones ocultos que conectan cosas aparentemente desconectadas.", value: 'malandra' },
+                    { text: "Crear realidades alternativas tan convincentes que otros las adoptan como propias.", value: 'fresa' },
+                ]
+            }
+        ];
+
+        function startQuiz() {
+            document.getElementById('quiz-start-screen').classList.add('hidden');
+            document.getElementById('quiz-area').classList.remove('hidden');
+            currentQuestionIndex = 0;
+            scores = { chola: 0, malandra: 0, fresa: 0 };
+            renderQuestion();
+            document.getElementById('quiz-area').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function renderQuestion() {
+            if (currentQuestionIndex >= quizQuestions.length) {
+                document.getElementById('next-button').classList.add('hidden');
+                document.getElementById('result-button').classList.remove('hidden');
+                return;
+            }
+
+            const questionData = quizQuestions[currentQuestionIndex];
+            document.getElementById('question-text').textContent = `${currentQuestionIndex + 1}. ${questionData.text}`;
+            
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = questionData.options.map((option, index) => `
+                <div class="quiz-option" data-value="${option.value}" onclick="selectOption(this, '${option.value}')">
+                    ${option.text}
+                </div>
+            `).join('');
+            
+            selectedOption = null;
+            document.getElementById('next-button').classList.add('hidden');
+            document.getElementById('result-button').classList.add('hidden');
+        }
+
+        function selectOption(element, value) {
+            document.querySelectorAll('#options-container .quiz-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            selectedOption = value;
+            document.getElementById('next-button').classList.remove('hidden');
+        }
+
+        function nextQuestion() {
+            if (selectedOption) {
+                scores[selectedOption]++;
+                currentQuestionIndex++;
+                renderQuestion();
+                document.getElementById('current-question').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        function showQuizResult() {
+            document.getElementById('quiz-area').classList.add('hidden');
+            document.getElementById('quiz-result').classList.remove('hidden');
+
+            let dominantArchetype = 'chola';
+            let maxScore = -1;
+            for (const key in scores) {
+                if (scores[key] > maxScore) {
+                    maxScore = scores[key];
+                    dominantArchetype = key;
+                }
+            }
+            
+            const resultCert = certificationsData.find(c => c.key === dominantArchetype);
+            document.getElementById('result-title').textContent = `¡FELICIDADES! ERES ${resultCert.icon} ${resultCert.key.toUpperCase()}`;
+            document.getElementById('result-description').textContent = resultCert.description;
+            document.getElementById('result-srap-tip').textContent = resultCert.srap;
+            
+            // Efecto de celebración
+            celebrateMastery();
+            document.getElementById('quiz-result').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetQuiz() {
+            document.getElementById('quiz-result').classList.add('hidden');
+            document.getElementById('quiz-start-screen').classList.remove('hidden');
+        }
+
+        // === SISTEMA DE HACKS COMPLETO ===
+        function isHackCompleted(id) {
+            return localStorage.getItem(`hack_${id}_completed`) === 'true';
+        }
+
+        function toggleHackCompletion(id) {
+            const isCompleted = isHackCompleted(id);
+            localStorage.setItem(`hack_${id}_completed`, isCompleted ? 'false' : 'true');
+            renderHackCards();
+            renderCertifications();
+            updateGlobalProgress();
+            
+            if (!isCompleted) {
+                celebrateMastery();
+                checkForUpsell();
+            }
+        }
+
+        function updateGlobalProgress() {
+            const totalHacks = hacksData.length;
+            const completedHacks = hacksData.filter(h => isHackCompleted(h.id)).length;
+            const progressPercent = Math.round((completedHacks / totalHacks) * 100);
+
+            document.getElementById('global-progress-bar').style.width = `${progressPercent}%`;
+            document.getElementById('progress-text').textContent = `${completedHacks}/${totalHacks} Hacks Magistrales Dominados (${progressPercent}%)`;
+        }
+
+        function renderHackCards() {
+            const container = document.getElementById('hacks-container');
+            container.innerHTML = hacksData.map(hack => {
+                const completed = isHackCompleted(hack.id);
+                return `
+                    <div class="card-hack rounded-2xl p-6 flex flex-col justify-between" data-hack-id="${hack.id}">
+                        <div>
+                            <div class="flex items-start justify-between mb-3">
+                                <h3 class="text-2xl font-bold ${hack.colorClass} leading-tight">${hack.icon} ${hack.title}</h3>
+                                <div class="text-4xl font-black text-white/60">${hack.id}</div>
+                            </div>
+                            <p class="text-base text-gray-400 mb-4 font-semibold">${hack.archetypeIcon} ${hack.archetype.toUpperCase()} - ${hack.subtitle}</p>
+                            <div class="mt-4 border-t border-gray-700 pt-4">
+                                <p class="text-sm font-bold text-gray-400 mb-2">PROTOCOLO:</p>
+                                <p class="text-lg text-white font-semibold">${hack.metodo}</p>
+                            </div>
+                        </div>
+                        <div class="mt-6 flex space-x-3">
+                            <button class="flex-1 text-center bg-gray-800 text-yellow-400 text-base font-bold py-3 rounded-xl hover:bg-gray-700 transition-colors" onclick="showModal(${hack.id})">
+                                ⚡ AMPLIFICAR
+                            </button>
+                            <button class="completion-btn ${completed ? 'completed' : 'pending'} text-base" onclick="event.stopPropagation(); toggleHackCompletion(${hack.id})">
+                                ${completed ? '✓ DOMINADO' : 'ACTIVAR'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderCertifications() {
+            const container = document.getElementById('certifications-container');
+            container.innerHTML = certificationsData.map(cert => {
+                const status = checkArchetypeCompletion(cert.key);
+                const progressWidth = (status.completedCount / status.totalHacks) * 100;
+                
+                return `
+                    <div class="cert-card rounded-2xl p-6 ${status.unlocked ? 'unlocked' : ''}">
+                        <h3 class="text-3xl font-black ${cert.color} mb-4 flex items-center">
+                            ${cert.icon} ${cert.title}
+                        </h3>
+                        <p class="text-gray-400 text-lg mb-6 leading-relaxed">${cert.description}</p>
+                        
+                        <div class="mb-6">
+                            <div class="flex justify-between text-sm font-bold mb-2">
+                                <span class="${status.unlocked ? 'text-green-400' : 'text-red-400'}">HACKS: ${status.completedCount}/${status.totalHacks}</span>
+                                <span class="${status.unlocked ? 'text-green-400' : 'text-red-400'}">${Math.round(progressWidth)}%</span>
+                            </div>
+                            <div class="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-green-500 to-emerald-600 transition-all duration-700" style="width: ${progressWidth}%;"></div>
+                            </div>
+                        </div>
+
+                        <button class="w-full text-center text-white font-bold py-4 rounded-xl transition-all ${status.unlocked ? 'bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-700 hover:to-emerald-800 pulse-glow' : 'bg-gray-700 cursor-not-allowed'}" 
+                                ${status.unlocked ? 'onclick="downloadCertificate(\'' + cert.key + '\')"' : 'disabled'}>
+                            ${status.unlocked ? '⬇️ DESCARGAR CERTIFICACIÓN' : 'HACKS PENDIENTES: ' + (status.totalHacks - status.completedCount)}
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function checkArchetypeCompletion(certKey) {
+            const cert = certificationsData.find(c => c.key === certKey);
+            const completedCount = cert.hacks.filter(isHackCompleted).length;
+            return { completedCount, totalHacks: cert.hacks.length, unlocked: completedCount === cert.hacks.length };
+        }
+
+        // === SISTEMA DE MODALES ===
+        function showModal(id) {
+            const hack = hacksData.find(h => h.id === id);
+            document.getElementById('modal-hack-title').textContent = `${hack.icon} ${hack.title}`;
+            document.getElementById('modal-hack-subtitle').textContent = `${hack.subtitle} | Protocolo: ${hack.metodo}`;
+            document.getElementById('modal-amplificacion').textContent = hack.amplificacion;
+            document.getElementById('modal-ejercicio').textContent = hack.ejercicio;
+            document.getElementById('amplificacion-modal').classList.add('active');
+        }
+
+        function showSRAPModal() {
+            document.getElementById('modal-hack-title').textContent = '🌀 RITUAL SRAP ACTIVADO';
+            document.getElementById('modal-hack-subtitle').textContent = 'Sincroniza Ritmos en Acción Presente';
+            document.getElementById('modal-amplificacion').textContent = 'Detente completamente. Haz una pausa consciente de 5 segundos. Nombra el patrón que acabas de reconocer (ej: Inercia, Miedo al Caos, Falla por Intuición). Define una acción inmediata, pequeña y concreta (Acción Presente) inspirada en el Hack que necesites aplicar ahora.';
+            document.getElementById('modal-ejercicio').textContent = 'Ejercicio de Activación: Cierra los ojos, respira tres veces sincronizado con el ritmo de tu corazón (SRAP). Abre los ojos y decide UN SOLO Hack que aplicarás en las próximas 24 horas.';
+            document.getElementById('amplificacion-modal').classList.add('active');
+            startSRAPPulse();
+        }
+
+        function hideModal() {
+            document.getElementById('amplificacion-modal').classList.remove('active');
+            stopSRAPPulse();
+        }
+
+        // === SISTEMA DE SONIDO Y ANIMACIONES ===
+        let synth = null;
+        try {
+            if (window.Tone) {
+                synth = new Tone.Synth().toDestination();
+            }
+        } catch (e) {
+            console.log("Audio no disponible");
+        }
+
+        function celebrateMastery() {
+            createConfetti();
+            if (synth) {
+                const now = Tone.now();
+                ['C4', 'E4', 'G4', 'C5'].forEach((note, i) => {
+                    synth.triggerAttackRelease(note, "8n", now + i * 0.2);
+                });
+            }
+        }
+
+        function createConfetti() {
+            const emojis = ['🎉','✨','💥','🌟','🔥','🍓','🔪','👑','⚡','🎊'];
+            for(let i = 0; i < 60; i++){
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.fontSize = (Math.random() * 24 + 16) + 'px';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                confetti.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
+        }
+
+        function startSRAPPulse() {
+            document.getElementById('srap-pulse').style.opacity = '1';
+            document.getElementById('srap-pulse').classList.add('pulsing');
+        }
+
+        function stopSRAPPulse() {
+            document.getElementById('srap-pulse').style.opacity = '0';
+            document.getElementById('srap-pulse').classList.remove('pulsing');
+        }
+
+        // === SISTEMA DE CERTIFICADOS ===
+        function downloadCertificate(key) {
+            const cert = certificationsData.find(c => c.key === key);
+            if (!checkArchetypeCompletion(key).unlocked) return;
+
+            celebrateMastery();
+            const date = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const certificateContent = `
+                <html>
+                <head>
+                    <title>Certificado - ${cert.title}</title>
+                    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Open Sans', sans-serif; background: #0D0A0B; color: #F8F9FA; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+                        .certificate { width: 800px; padding: 50px; border: 15px solid #FFD700; background: linear-gradient(135deg, #1a1a1a, #0f0f0f); text-align: center; box-shadow: 0 0 60px rgba(255, 215, 0, 0.5); }
+                        h1 { font-family: 'Montserrat', sans-serif; font-size: 3rem; color: #FFD700; margin-bottom: 10px; text-shadow: 0 0 10px #FFA500; }
+                        h2 { font-size: 2rem; color: #FF4D6D; margin-bottom: 30px; }
+                        p { font-size: 1.3rem; margin-bottom: 20px; }
+                        .signature { margin-top: 50px; border-top: 3px dashed #4a4a4a; padding-top: 20px; font-style: italic; font-size: 1.1rem; }
+                    </style>
+                </head>
+                <body>
+                    <div class="certificate">
+                        <h1>CERTIFICADO DE MAESTRÍA</h1>
+                        <h2>${cert.icon} ${cert.title} ${cert.icon}</h2>
+                        <p>Se otorga a:</p>
+                        <p style="font-size: 2.5rem; font-weight: bold; color: #2A9D8F;">[NOMBRE DEL MAESTRO]</p>
+                        <p>Por demostrar dominio absoluto de los protocolos ${cert.title.split(' en ')[1]}</p>
+                        <div class="signature">
+                            Chalamandra Magistral<br>
+                            Sistema de Decodificación Cognitiva
+                        </div>
+                        <div style="margin-top: 30px; font-size: 1rem; color: #999;">Emitido: ${date}</div>
+                    </div>
+                </body>
+                </html>
+            `;
+            
+            const newWindow = window.open();
+            newWindow.document.write(certificateContent);
+            newWindow.document.close();
+        }
+
+                // === SISTEMA DE UPSEL AUTOMÁTICO ===
+        function checkForUpsell() {
+            const completedHacks = hacksData.filter(h => isHackCompleted(h.id)).length;
+            if (completedHacks === 3) {
+                setTimeout(() => showUpsellModal(), 1500);
+            }
+        }
+
+        function showUpsellModal() {
+            const modal = document.getElementById('amplificacion-modal');
+            document.getElementById('modal-hack-title').textContent = '🎯 ¡DOMINIO DETECTADO!';
+            document.getElementById('modal-hack-subtitle').textContent = 'Has completado 3+ hacks - Es hora de llevar esto al siguiente nivel';
+            document.getElementById('modal-amplificacion').textContent = 'Los patrones que estás descubriendo son solo el comienzo. Con una sesión personalizada, podemos aplicar estos hacks directamente a tu situación específica y crear un plan de acción 10x más efectivo.';
+            document.getElementById('modal-ejercicio').textContent = '🔥 OFERTA ESPECIAL: Agenda tu Sesión Descubrimiento de $27 USD y recibe un mapa personalizado de aplicación inmediata + 3 estrategias específicas para tu contexto.';
+            
+            // Reemplazar el botón de cerrar por uno de acción
+            const modalButton = modal.querySelector('button');
+            modalButton.innerHTML = '🚀 QUIERO MI SESIÓN DE $27 USD';
+            modalButton.onclick = () => {
+                hideModal();
+                selectService('sesion-descubrimiento');
+                document.getElementById('contact-form').scrollIntoView({ behavior: 'smooth' });
+            };
+            
+            modal.classList.add('active');
+            celebrateMastery();
+        }
+
+        // === SISTEMA DE FORMULARIO MEJORADO ===
+        function selectService(service) {
+            document.querySelector('select[name="service"]').value = service;
+            document.getElementById('contact-form').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const service = formData.get('service');
+            const name = formData.get('name');
+            
+            // Simular envío (en producción conectarías con tu backend)
+            simulateFormSubmission(service, name);
+        }
+
+        function simulateFormSubmission(service, name) {
+            // Mostrar loading
+            const form = document.getElementById('contact-form');
+            form.innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-400 mx-auto mb-4"></div>
+                    <h3 class="text-2xl font-black text-yellow-400 mb-4">PROCESANDO SOLICITUD...</h3>
+                    <p class="text-gray-300">Preparando tu acceso al sistema</p>
+                </div>
+            `;
+
+            // Simular delay de procesamiento
+            setTimeout(() => {
+                showSuccessMessage(service, name);
+            }, 2000);
+        }
+
+        function showSuccessMessage(service, name) {
+            const serviceNames = {
+                'sesion-descubrimiento': 'Sesión Descubrimiento',
+                'kit-magistral': 'Kit Magistral', 
+                'transformacion-total': 'Transformación Total'
+            };
+
+            const formContainer = document.querySelector('.contact-form-container');
+            formContainer.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-6">🎉</div>
+                    <h3 class="text-4xl font-black text-center mb-6 text-green-400">
+                        ¡ACCESO CONCEDIDO!
+                    </h3>
+                    <p class="text-xl text-gray-300 mb-8 leading-relaxed">
+                        Perfecto, <strong>${name}</strong>. Tu solicitud para <strong>${serviceNames[service]}</strong> ha sido procesada.<br>
+                        <span class="text-yellow-400">Revisa tu email en los próximos minutos</span> para los detalles de pago y protocolos de activación.
+                    </p>
+                    
+                    <div class="bg-gray-800 p-6 rounded-2xl mb-8 border-l-4 border-green-400">
+                        <h4 class="text-2xl font-bold text-green-400 mb-4">📧 ¿QUÉ SIGUE?</h4>
+                        <ul class="text-gray-300 text-left space-y-3 text-lg">
+                            <li>✅ <strong>Recibirás un email</strong> con instrucciones de pago</li>
+                            <li>✅ <strong>Agendaremos tu sesión</strong> en menos de 2 horas</li>
+                            <li>✅ <strong>Acceso inmediato</strong> a los materiales después del pago</li>
+                            <li>✅ <strong>Soporte prioritario</strong> durante todo el proceso</li>
+                        </ul>
+                    </div>
+
+                    <button onclick="window.location.reload()" class="px-10 py-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-black rounded-2xl transition-all transform hover:scale-105 text-lg">
+                        🏠 VOLVER AL INICIO
+                    </button>
+                    
+                    <div class="mt-6 text-sm text-gray-400">
+                        ¿Problemas? Escríbenos a: <strong class="text-yellow-400">hola@chalamandramagistral.com</strong>
+                    </div>
+                </div>
+            `;
+
+            // Efecto de celebración
+            celebrateMastery();
+        }
+
+        // === INICIALIZACIÓN COMPLETA ===
+        window.onload = () => {
+            renderHackCards();
+            renderCertifications();
+            updateGlobalProgress();
+            
+            // Efecto de entrada
+            setTimeout(() => {
+                document.querySelector('header').classList.add('floating');
+            }, 1000);
+        };
+
+        // === EFECTOS ESPECIALES ADICIONALES ===
+        document.addEventListener('DOMContentLoaded', function() {
+            // Efecto de escritura en el hero
+            const heroText = "El Sistema Operativo del 1%";
+            const heroElement = document.querySelector('header p');
+            let i = 0;
+            
+            function typeWriter() {
+                if (i < heroText.length) {
+                    heroElement.innerHTML = heroText.substring(0, i+1);
+                    i++;
+                    setTimeout(typeWriter, 100);
+                }
+            }
+            
+            // Iniciar efecto después de 1 segundo
+            setTimeout(typeWriter, 1000);
+
+            // Efecto de aparición escalonada para las cards
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
+
+            // Aplicar a todos los elementos que queremos animar
+            document.querySelectorAll('.card-hack, .service-card, .cert-card').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(el);
+            });
+        });
+    </script>
+</body>
+</html>
