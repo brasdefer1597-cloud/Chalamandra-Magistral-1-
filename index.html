@@ -295,9 +295,38 @@
             50% { box-shadow: 0 0 40px rgba(255, 215, 0, 0.8); }
             100% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); }
         }
+
+        .whatsapp-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #25D366;
+            color: white;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(37, 211, 102, 0.5);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            animation: pulse-glow 2s infinite;
+        }
+        .whatsapp-float:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body class="min-h-screen">
+
+    <!-- WhatsApp Float -->
+    <a href="https://wa.me/1234567890?text=Hola,%20vi%20Chalamandra%20Magistral%20y%20quiero%20agendar%20mi%20sesión%20de%20$27%20USD" 
+       target="_blank"
+       class="whatsapp-float">
+       💬
+    </a>
 
     <!-- Header & Hero Section -->
     <header class="text-center py-20 md:py-28 hero-gradient relative overflow-hidden shadow-2xl">
@@ -306,8 +335,8 @@
             <h1 class="text-5xl md:text-7xl font-black premium-glow mb-4 floating">
                 CHALAMANDRA MAGISTRAL
             </h1>
-            <p class="text-2xl md:text-4xl font-semibold mb-6 text-white">
-                El Sistema Operativo del 1%
+            <p class="text-2xl md:text-4xl font-semibold mb-6 text-white" id="hero-text">
+                <!-- El texto se cargará con animación -->
             </p>
             <div class="max-w-2xl mx-auto text-lg md:text-xl text-white border-t border-b border-white/20 py-4 mt-8 font-semibold">
                 <span class="text-pink-300">🍓 Fresa</span> • 
@@ -567,13 +596,6 @@
         </div>
     </div>
 
-    <!-- WhatsApp Float -->
-    <a href="https://wa.me/1234567890?text=Hola,%20vi%20Chalamandra%20Magistral%20y%20quiero%20agendar%20mi%20sesión%20de%20$27%20USD" 
-       target="_blank"
-       class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-2xl z-50 transition-all hover:scale-110 pulse-glow">
-       <span class="text-2xl">💬</span>
-    </a>
-
     <!-- Modal -->
     <div id="amplificacion-modal" class="modal-overlay">
         <div class="modal-content">
@@ -602,6 +624,8 @@
 
     <script>
         // === CONFIGURACIÓN INICIAL ===
+        console.log("Chalamandra Magistral - Inicializando sistema");
+        
         const hacksData = [
             {id:1,title:"Scheherazade",subtitle:"Dominio Narrativo Absoluto",metodo:"7 Sombreros de Innovación",archetype:"fresa",archetypeIcon:'🍓',amplificacion:"No cuentes historias, secuestra marcos de referencia. Controlas la lente perceptual, no los eventos. Es 'pre-suasión' pura: construyes la catedral antes de invitar a orar.",ejercicio:"Antes de tu próxima reunión importante, envía un email 'preparatorio' que reencuadre el tema completamente a tu favor (ej: 'Imaginemos un futuro donde X sea imposible...')",colorClass:"text-pink-400",icon:'👑'},
             {id:2,title:"Hermes Trismegisto",subtitle:"Robo de Patrones Fractales",metodo:"5 Porqués (Excavación Profunda)",archetype:"malandra",archetypeIcon:'🔪',amplificacion:"El sistema operativo de la realidad. Las 'causas raíz' son universales en forma, no únicas en contenido. Transfiere soluciones a la estructura, no al problema específico.",ejercicio:"Crea un 'mapa fractal' semanal: toma un problema personal y encuéntralo replicado en 3 contextos históricos o industriales completamente diferentes.",colorClass:"text-green-400",icon:'🔑'},
@@ -667,6 +691,7 @@
         ];
 
         function startQuiz() {
+            console.log("Quiz iniciado");
             document.getElementById('quiz-start-screen').classList.add('hidden');
             document.getElementById('quiz-area').classList.remove('hidden');
             currentQuestionIndex = 0;
@@ -731,7 +756,6 @@
             document.getElementById('result-description').textContent = resultCert.description;
             document.getElementById('result-srap-tip').textContent = resultCert.srap;
             
-            // Efecto de celebración
             celebrateMastery();
             document.getElementById('quiz-result').scrollIntoView({ behavior: 'smooth' });
         }
@@ -764,12 +788,24 @@
             const completedHacks = hacksData.filter(h => isHackCompleted(h.id)).length;
             const progressPercent = Math.round((completedHacks / totalHacks) * 100);
 
-            document.getElementById('global-progress-bar').style.width = `${progressPercent}%`;
-            document.getElementById('progress-text').textContent = `${completedHacks}/${totalHacks} Hacks Magistrales Dominados (${progressPercent}%)`;
+            const progressBar = document.getElementById('global-progress-bar');
+            const progressText = document.getElementById('progress-text');
+            
+            if (progressBar) {
+                progressBar.style.width = `${progressPercent}%`;
+            }
+            if (progressText) {
+                progressText.textContent = `${completedHacks}/${totalHacks} Hacks Magistrales Dominados (${progressPercent}%)`;
+            }
         }
 
         function renderHackCards() {
             const container = document.getElementById('hacks-container');
+            if (!container) {
+                console.log("Contenedor de hacks no encontrado");
+                return;
+            }
+            
             container.innerHTML = hacksData.map(hack => {
                 const completed = isHackCompleted(hack.id);
                 return `
@@ -800,6 +836,11 @@
 
         function renderCertifications() {
             const container = document.getElementById('certifications-container');
+            if (!container) {
+                console.log("Contenedor de certificaciones no encontrado");
+                return;
+            }
+            
             container.innerHTML = certificationsData.map(cert => {
                 const status = checkArchetypeCompletion(cert.key);
                 const progressWidth = (status.completedCount / status.totalHacks) * 100;
@@ -839,6 +880,8 @@
         // === SISTEMA DE MODALES ===
         function showModal(id) {
             const hack = hacksData.find(h => h.id === id);
+            if (!hack) return;
+            
             document.getElementById('modal-hack-title').textContent = `${hack.icon} ${hack.title}`;
             document.getElementById('modal-hack-subtitle').textContent = `${hack.subtitle} | Protocolo: ${hack.metodo}`;
             document.getElementById('modal-amplificacion').textContent = hack.amplificacion;
@@ -895,13 +938,19 @@
         }
 
         function startSRAPPulse() {
-            document.getElementById('srap-pulse').style.opacity = '1';
-            document.getElementById('srap-pulse').classList.add('pulsing');
+            const pulse = document.getElementById('srap-pulse');
+            if (pulse) {
+                pulse.style.opacity = '1';
+                pulse.classList.add('pulsing');
+            }
         }
 
         function stopSRAPPulse() {
-            document.getElementById('srap-pulse').style.opacity = '0';
-            document.getElementById('srap-pulse').classList.remove('pulsing');
+            const pulse = document.getElementById('srap-pulse');
+            if (pulse) {
+                pulse.style.opacity = '0';
+                pulse.classList.remove('pulsing');
+            }
         }
 
         // === SISTEMA DE CERTIFICADOS ===
@@ -948,7 +997,7 @@
             newWindow.document.close();
         }
 
-                // === SISTEMA DE UPSEL AUTOMÁTICO ===
+        // === SISTEMA DE UPSEL AUTOMÁTICO ===
         function checkForUpsell() {
             const completedHacks = hacksData.filter(h => isHackCompleted(h.id)).length;
             if (completedHacks === 3) {
@@ -963,7 +1012,6 @@
             document.getElementById('modal-amplificacion').textContent = 'Los patrones que estás descubriendo son solo el comienzo. Con una sesión personalizada, podemos aplicar estos hacks directamente a tu situación específica y crear un plan de acción 10x más efectivo.';
             document.getElementById('modal-ejercicio').textContent = '🔥 OFERTA ESPECIAL: Agenda tu Sesión Descubrimiento de $27 USD y recibe un mapa personalizado de aplicación inmediata + 3 estrategias específicas para tu contexto.';
             
-            // Reemplazar el botón de cerrar por uno de acción
             const modalButton = modal.querySelector('button');
             modalButton.innerHTML = '🚀 QUIERO MI SESIÓN DE $27 USD';
             modalButton.onclick = () => {
@@ -978,8 +1026,10 @@
 
         // === SISTEMA DE FORMULARIO MEJORADO ===
         function selectService(service) {
-            document.querySelector('select[name="service"]').value = service;
-            document.getElementById('contact-form').scrollIntoView({ behavior: 'smooth' });
+            const select = document.querySelector('select[name="service"]');
+            if (select) select.value = service;
+            const form = document.getElementById('contact-form');
+            if (form) form.scrollIntoView({ behavior: 'smooth' });
         }
 
         function handleFormSubmit(event) {
@@ -988,13 +1038,13 @@
             const service = formData.get('service');
             const name = formData.get('name');
             
-            // Simular envío (en producción conectarías con tu backend)
             simulateFormSubmission(service, name);
         }
 
         function simulateFormSubmission(service, name) {
-            // Mostrar loading
             const form = document.getElementById('contact-form');
+            if (!form) return;
+            
             form.innerHTML = `
                 <div class="text-center py-8">
                     <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-400 mx-auto mb-4"></div>
@@ -1003,7 +1053,6 @@
                 </div>
             `;
 
-            // Simular delay de procesamiento
             setTimeout(() => {
                 showSuccessMessage(service, name);
             }, 2000);
@@ -1017,6 +1066,8 @@
             };
 
             const formContainer = document.querySelector('.contact-form-container');
+            if (!formContainer) return;
+            
             formContainer.innerHTML = `
                 <div class="text-center py-12">
                     <div class="text-6xl mb-6">🎉</div>
@@ -1048,41 +1099,40 @@
                 </div>
             `;
 
-            // Efecto de celebración
             celebrateMastery();
         }
 
         // === INICIALIZACIÓN COMPLETA ===
         window.onload = () => {
+            console.log("Chalamandra Magistral - Inicializando sistema completo");
+            
+            // Inicializar componentes
             renderHackCards();
             renderCertifications();
             updateGlobalProgress();
             
-            // Efecto de entrada
-            setTimeout(() => {
-                document.querySelector('header').classList.add('floating');
-            }, 1000);
-        };
-
-        // === EFECTOS ESPECIALES ADICIONALES ===
-        document.addEventListener('DOMContentLoaded', function() {
             // Efecto de escritura en el hero
             const heroText = "El Sistema Operativo del 1%";
-            const heroElement = document.querySelector('header p');
-            let i = 0;
-            
-            function typeWriter() {
-                if (i < heroText.length) {
-                    heroElement.innerHTML = heroText.substring(0, i+1);
-                    i++;
-                    setTimeout(typeWriter, 100);
+            const heroElement = document.getElementById('hero-text');
+            if (heroElement) {
+                let i = 0;
+                function typeWriter() {
+                    if (i < heroText.length) {
+                        heroElement.innerHTML = heroText.substring(0, i+1);
+                        i++;
+                        setTimeout(typeWriter, 100);
+                    }
                 }
+                setTimeout(typeWriter, 1000);
             }
             
-            // Iniciar efecto después de 1 segundo
-            setTimeout(typeWriter, 1000);
+            // Efecto flotante en header
+            setTimeout(() => {
+                const header = document.querySelector('header');
+                if (header) header.classList.add('floating');
+            }, 1000);
 
-            // Efecto de aparición escalonada para las cards
+            // Efectos de aparición escalonada
             const observerOptions = {
                 threshold: 0.1,
                 rootMargin: '0px 0px -50px 0px'
@@ -1097,13 +1147,17 @@
                 });
             }, observerOptions);
 
-            // Aplicar a todos los elementos que queremos animar
             document.querySelectorAll('.card-hack, .service-card, .cert-card').forEach(el => {
                 el.style.opacity = '0';
                 el.style.transform = 'translateY(30px)';
                 el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
                 observer.observe(el);
             });
+        };
+
+        // Inicialización adicional cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM completamente cargado - Chalamandra Magistral lista");
         });
     </script>
 </body>
